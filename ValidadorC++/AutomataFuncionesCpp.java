@@ -59,6 +59,32 @@ public class AutomataFuncionesCpp {
         }
         return contenido.toString();
     }
-
+    
+ private static List<Token> analizarLexico(String codigo) {
+        List<Token> tokens = new ArrayList<>();
+        
+        String regexTipo = "\\b(int|void|double|float|char|string|bool)\\b";
+        String regexId = "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b";
+        
+        String regexGeneral = String.format("(?<TIPO>%s)|(?<ID>%s)|(?<PARENIZQ>\\()|(?<PARENDER>\\))|(?<LLAVEIZQ>\\{)|(?<LLAVEDER>\\})|(?<COMA>,)|(?<ESPACIOS>\\s+)|(?<DESCONOCIDO>.)", regexTipo, regexId);
+        
+        Pattern pattern = Pattern.compile(regexGeneral);
+        Matcher matcher = pattern.matcher(codigo);
+        
+        while (matcher.find()) {
+            if (matcher.group("ESPACIOS") != null) continue; // Ignorar espacios en blanco
+            
+            // DEV2: Mapeo de grupos a tipos de token
+            if (matcher.group("TIPO") != null) tokens.add(new Token(TipoToken.TIPO_DATO, matcher.group("TIPO")));
+            else if (matcher.group("ID") != null) tokens.add(new Token(TipoToken.IDENTIFICADOR, matcher.group("ID")));
+            else if (matcher.group("PARENIZQ") != null) tokens.add(new Token(TipoToken.PAREN_IZQ, "("));
+            else if (matcher.group("PARENDER") != null) tokens.add(new Token(TipoToken.PAREN_DER, ")"));
+            else if (matcher.group("LLAVEIZQ") != null) tokens.add(new Token(TipoToken.LLAVE_IZQ, "{"));
+            else if (matcher.group("LLAVEDER") != null) tokens.add(new Token(TipoToken.LLAVE_DER, "}"));
+            else if (matcher.group("COMA") != null) tokens.add(new Token(TipoToken.COMA, ","));
+            else tokens.add(new Token(TipoToken.DESCONOCIDO, matcher.group("DESCONOCIDO")));
+        }
+        return tokens;
+    }
 
 }
